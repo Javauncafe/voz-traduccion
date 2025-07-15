@@ -1,33 +1,37 @@
 
 import streamlit as st
-import speech_recognition as sr
 from googletrans import Translator
 from docx import Document
 from fpdf import FPDF
 import tempfile
+import speech_recognition as sr
+import os
 
-st.set_page_config(page_title="Voz a Texto y Traducción", layout="centered")
-
-st.title("🗣️ Transcripción y Traducción de Voz (Inglés a Español)")
+st.set_page_config(page_title="Audio a Texto y Traducción", layout="centered")
+st.title("🗣️ Subir Audio en Inglés y Obtener Traducción en Español")
 
 recognizer = sr.Recognizer()
 translator = Translator()
 
-def transcribe_audio():
-    with sr.Microphone() as source:
-        st.info("Habla en inglés ahora...")
-        audio = recognizer.listen(source, timeout=5)
-        st.success("Grabación completada.")
+uploaded_file = st.file_uploader("Sube un archivo de audio (WAV o MP3)", type=["wav", "mp3"])
+
+def transcribe_audio_file(file_path):
+    with sr.AudioFile(file_path) as source:
+        audio = recognizer.record(source)
         try:
-            text = recognizer.recognize_google(audio, language="en-US")
-            return text
+            return recognizer.recognize_google(audio, language="en-US")
         except sr.UnknownValueError:
             return "No se pudo entender el audio."
         except sr.RequestError:
             return "Error de conexión con el servicio de reconocimiento."
 
-if st.button("🎙️ Grabar Voz en Inglés"):
-    english_text = transcribe_audio()
+if uploaded_file is not None:
+    temp_audio_path = os.path.join("temp_audio.wav")
+    with open(temp_audio_path, "wb") as f:
+        f.write(uploaded_file.read())
+
+    st.info("Procesando audio...")
+    english_text = transcribe_audio_file(temp_audio_path)
     st.subheader("Texto en Inglés:")
     st.write(english_text)
 
