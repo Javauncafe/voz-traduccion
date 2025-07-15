@@ -1,6 +1,6 @@
 
 import streamlit as st
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 from docx import Document
 from fpdf import FPDF
 import tempfile
@@ -11,7 +11,6 @@ st.set_page_config(page_title="Audio a Texto y Traducción", layout="centered")
 st.title("🗣️ Subir Audio en Inglés y Obtener Traducción en Español")
 
 recognizer = sr.Recognizer()
-translator = Translator()
 
 uploaded_file = st.file_uploader("Sube un archivo de audio (WAV o MP3)", type=["wav", "mp3"])
 
@@ -36,7 +35,7 @@ if uploaded_file is not None:
     st.write(english_text)
 
     with st.spinner("Traduciendo al español..."):
-        translated_text = translator.translate(english_text, src='en', dest='es').text
+        translated_text = GoogleTranslator(source='en', target='es').translate(english_text)
         st.subheader("Texto en Español:")
         st.write(translated_text)
 
